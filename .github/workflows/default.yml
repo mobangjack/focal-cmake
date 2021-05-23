@@ -4,21 +4,21 @@ on: [push, pull_request]
 
 env:
   IMAGE_NAME: focal-cmake
+  CMAKE_VERSION: 3.20.2
 
 jobs:
   build-and-deploy:
-    strategy:
-      matrix:
-        cmake-version: [3.20.2]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: build focal-cmake:${{ matrix.cmake-version }}
+    - name: build focal-cmake:${{ env.CMAKE_VERSION }}
       run: |
-        docker build . -t ${IMAGE_NAME}:${{ matrix.cmake-version }} --build-arg CMAKE_VERSION=${{ matrix.cmake-version }}
+        docker build . -t ${IMAGE_NAME}:${{ env.CMAKE_VERSION }} --build-arg CMAKE_VERSION=${{ env.CMAKE_VERSION }}
     - name: docker login
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-    - name: push focal-cmake:${{ matrix.cmake-version }}
+    - name: push focal-cmake:${{ env.CMAKE_VERSION }}
       run: |
-        docker tag ${IMAGE_NAME}:${{ matrix.cmake-version }} ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:${{ matrix.cmake-version }}
-        docker push ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:${{ matrix.cmake-version }}
+        docker tag ${IMAGE_NAME}:${{ env.CMAKE_VERSION }} ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:${{ env.CMAKE_VERSION }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:${{ env.CMAKE_VERSION }}
+        docker tag ${IMAGE_NAME}:${{ env.CMAKE_VERSION }} ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/${IMAGE_NAME}:latest
